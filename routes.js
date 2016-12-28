@@ -18,8 +18,10 @@ router.route('/addUser').post(function (req, res) {
             console.log(err);
             return;
         }
-        req.body
+        console.log(req.body)
         var users = db.collection('users');
-        
+
     })
 });
+
+module.exports = router;
