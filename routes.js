@@ -11,17 +11,17 @@ router.use(function timeLog(req, res, next) {
 }); //logs every request recieved in console, should add request content type checking
 
 router.route('/addUser').post(function (req, res) {
-    
-    mongo.connect(dburl, function (err, db) {
+    console.log(req.body.user);
+    /*mongo.connect(dburl, function (err, db) {
         if (err) {
             res.end(err);
             console.log(err);
             return;
         }
-        console.log(req.body)
+        console.log(req.body);
         var users = db.collection('users');
 
-    })
+    })*/
 });
 
 module.exports = router;
