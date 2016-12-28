@@ -1,27 +1,27 @@
 {
     "user": {
-        "_id" : "",            
-        "first_name" : "",
-        "last_name" : "",
+        "facebookId" : "",    //fb id stored in db        
+        "firsName" : "",
+        "lastName" : "",
         "favors" : {},          //array of ids of favor objects in favors collection
         "location" : { "lat" : "", "long" : ""},
-        "fb_token" : "",       
-        "firebase_token" : "", 
+        "facebookToken" : "",       
+        "firebaseToken" : "", 
         "rating" : ""         
     }
 }
 
 {
     "favors" : {
-        "_id" : "",
-        "location_favor" : "",
-        "location_recipient" : "",
-        "is_complete" : "", //bool
+        "facebookId" : "",  //mongo id?
+        "locationFavor" : "",
+        "locationRecipient" : "",
+        "isComplete" : "", //bool
         "title" : "", //string
         "details" : "", //string
-        "recipient_id" : "", //mongo id of recipient
-        "doer_id" : "", //mongo id of person of doing favour, initially undefined
-        "price_range" : {"min" : "", "max" : ""}, //set by recipient
+        "recipientId" : "", //fb id of recipient
+        "doerId" : "", //fb id of person of doing favour, initially undefined
+        "priceRange" : {"min" : "", "max" : ""}, //set by recipient
         "tip" : "" //set by recipient
     }
 }
