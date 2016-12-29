@@ -63,10 +63,12 @@ router.route('/getUser').post(function (req, res) {
             if (err) {
                 res.send(false);
                 console.log(err);
+                db.close();
                 return;
             }
 
             res.send(docs[0]);
+            db.close();
 
         });
     });
@@ -114,11 +116,13 @@ router.route('/getFavorsRequested').post(function (req, res) {
                     if (err) {
                         res.send(false);
                         console.log(err);
+                        db.close();
                         return;
                     }
                     if (docs[0] === undefined) {
                         res.send(true);
                         console.log('invalid json object')
+                        db.close();
                         return;
                     }
                     if (docs[0].recipientId === foundUser.facebookId) {
@@ -129,6 +133,7 @@ router.route('/getFavorsRequested').post(function (req, res) {
                     if (favorsIter === favorIdArray.length) {
                         res.send(favorArray);
                         console.log('favor array sent')
+                        db.close();
                     }
 
                 });
@@ -162,11 +167,48 @@ router.route('/updateLocation').put(function (req, res) {
                 if(err){
                     res.send(false);
                     console.log(err);
+                    db.close();
                     return;
                 }
 
                 res.send(true);
                 console.log("location of user: " + req.body.user.facebookId + " updated successfully");
+                db.close();
+            }
+        );
+    });
+});
+
+router.route('/updateTip').put(function (req, res) {
+    if (req.body.favor === undefined) {
+        res.send(false)
+        console.log('invalid favor object sent');
+        return;
+    }
+
+    mongo.connect(dburl, function (err, db) {
+        if (err) {
+            res.send(false);
+            console.log(err);
+            return;
+        }
+
+        var favors = db.collection('favors');
+
+        favors.updateOne(
+            {"_id" : new mongo.ObjectID(req.body.favor._id)},
+            {$set : {"tip" : req.body.favor.tip}},
+            { w: 1 },
+            function(err, object){
+                if(err){
+                    res.send(false);
+                    console.log(err);
+                    return;
+                }
+
+                res.send(true);
+                console.log("tip of favor: " + req.body.favor._id + " updated successfully");
+                db.close();
             }
         );
     });
