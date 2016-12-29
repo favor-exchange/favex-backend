@@ -1,7 +1,7 @@
 USER
 {
    "facebookId" : "",    //fb id stored in db        
-    "firsName" : "",
+    "firstName" : "",
     "lastName" : "",
     "favors" : [{"id" : ""}],          //array of ids of favor objects in favors collection
     "location" : { "lat" : "", "long" : ""},

@@ -15,7 +15,7 @@ router.route('/addUser').post(function (req, res) {
 
     mongo.connect(dburl, function (err, db) {
         if (err) {
-            res.end(err);
+            res.send(false);
             console.log(err);
             return;
         }
@@ -23,18 +23,18 @@ router.route('/addUser').post(function (req, res) {
         var users = db.collection('users');
 
         users.updateOne(
-            { 'facebookId': req.body.user.facebookId },   //find user by fb id
+            { "facebookId": req.body.user.facebookId },   //find user by fb id
             req.body.user,                      //replace user found in db with this user object
             { upsert: true, w: 1 },                //add new object if doesn't exist
             function (err, object) {
                 if (err) {
-                    res.end(err);
+                    res.send(false);
                     console.log(err);
                     db.close();
                     return;
                 }
                 else {
-                    res.end('added successfully');
+                    res.send(true);
                     console.log('user added successfully');    //temp output to log inserted user
                     db.close();
                 }
@@ -45,14 +45,14 @@ router.route('/addUser').post(function (req, res) {
 router.route('/getUser').post(function (req, res) {
     //check if user object sent
     if (req.body.user === undefined) {
-        res.end('invalid user object sent')
+        res.send(false)
         console.log('invalid user object sent');
         return;
     }
 
     mongo.connect(dburl, function (err, db) {
         if (err) {
-            res.end(err);
+            res.send(false);
             console.log(err);
             return;
         }
@@ -61,7 +61,7 @@ router.route('/getUser').post(function (req, res) {
 
         users.find({ 'facebookId': req.body.user.facebookId }).toArray(function (err, docs) {
             if (err) {
-                res.end(err);
+                res.send(false);
                 console.log(err);
                 return;
             }
@@ -75,14 +75,14 @@ router.route('/getUser').post(function (req, res) {
 
 router.route('/getFavorsRequested').post(function (req, res) {
     if (req.body.user === undefined) {
-        res.end('invalid user object sent')
+        res.send(false)
         console.log('invalid user object sent');
         return;
     }
 
     mongo.connect(dburl, function (err, db) {
         if (err) {
-            res.end(err);
+            res.send(false);
             console.log(err);
             return;
         }
@@ -92,12 +92,12 @@ router.route('/getFavorsRequested').post(function (req, res) {
         users.find({ 'facebookId': req.body.user.facebookId }).toArray(function (err, docs) {
 
             if (err) {
-                res.end(err);
+                res.send(false);
                 console.log(err);
                 return;
             }
 
-            var foundUser = docs[0]; 
+            var foundUser = docs[0];
 
             var favorIdArray = []; //array containing mongo ids of favors stored in user object
             for (var item in foundUser.favors) {
@@ -112,16 +112,16 @@ router.route('/getFavorsRequested').post(function (req, res) {
                 favors.find({ "_id": new mongo.ObjectID(favorIdArray[i]) }).toArray(function (err, docs) {
 
                     if (err) {
-                        res.end(err);
+                        res.send(false);
                         console.log(err);
                         return;
                     }
-                    if(docs[0] === undefined){
-                        res.end();
+                    if (docs[0] === undefined) {
+                        res.send(true);
                         console.log('invalid json object')
                         return;
                     }
-                    if(docs[0].recipientId === foundUser.facebookId){
+                    if (docs[0].recipientId === foundUser.facebookId) {
                         favorArray.push(docs[0]);
                     }
 
@@ -136,6 +136,39 @@ router.route('/getFavorsRequested').post(function (req, res) {
 
         });
 
+    });
+});
+
+router.route('/updateLocation').put(function (req, res) {
+    if (req.body.user === undefined) {
+        res.send(false)
+        console.log('invalid user object sent');
+        return;
+    }
+
+    mongo.connect(dburl, function (err, db) {
+        if (err) {
+            res.send(false);
+            console.log(err);
+            return;
+        }
+
+        var users = db.collection('users');
+
+        users.updateOne(
+            {"facebookId" : req.body.user.facebookId},
+            {$set : {"location" : req.body.user.location}},
+            function(err, object){
+                if(err){
+                    res.send(false);
+                    console.log(err);
+                    return;
+                }
+
+                res.send(true);
+                console.log("location of user: " + req.body.user.facebookId + " updated successfully");
+            }
+        );
     });
 });
 
