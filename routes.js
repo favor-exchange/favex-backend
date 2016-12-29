@@ -214,4 +214,73 @@ router.route('/updateTip').put(function (req, res) {
     });
 });
 
+router.route('/updateFavorStatus').put(function (req, res) {
+    if (req.body.favor === undefined) {
+        res.send(false)
+        console.log('invalid favor object sent');
+        return;
+    }
+
+    mongo.connect(dburl, function (err, db) {
+        if (err) {
+            res.send(false);
+            console.log(err);
+            return;
+        }
+
+        var favors = db.collection('favors');
+
+        favors.updateOne(
+            {"_id" : new mongo.ObjectID(req.body.favor._id)},
+            {$set : {"isComplete" : req.body.favor.isComplete}},
+            { w: 1 },
+            function(err, object){
+                if(err){
+                    res.send(false);
+                    console.log(err);
+                    return;
+                }
+
+                res.send(true);
+                console.log("status of favor: " + req.body.favor._id + " updated successfully");
+                db.close();
+            }
+        );
+    });
+});
+
+router.route('/deleteFavor').delete(function(req, res){
+    if (req.body.favor === undefined) {
+        res.send(false)
+        console.log('invalid favor object sent');
+        return;
+    }
+
+    mongo.connect(dburl, function(err, db){
+        if(err){
+            res.send(false);
+            console.log(err);
+            return;
+        }
+
+        var favors = db.collection('favors');
+
+        favors.remove(
+            {"_id" : new mongo.ObjectID(req.body.favor._id)},
+            function(err){
+                if(err){
+                    res.send(false);
+                    console.log(err);
+                    db.close();
+                    return;
+                }
+
+                res.send(true);
+                console.log('favor: ' + req.body.favor._id + ' successfully deleted');
+                db.close();
+            }
+        );
+    });
+});
+
 module.exports = router;
