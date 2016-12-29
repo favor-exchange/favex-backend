@@ -3,7 +3,7 @@
         "facebookId" : "",    //fb id stored in db        
         "firsName" : "",
         "lastName" : "",
-        "favors" : {},          //array of ids of favor objects in favors collection
+        "favors" : [{"id" : ""}],          //array of ids of favor objects in favors collection
         "location" : { "lat" : "", "long" : ""},
         "facebookToken" : "",       
         "firebaseToken" : "", 
@@ -13,7 +13,7 @@
 
 {
     "favors" : {
-        "facebookId" : "",  //mongo id?
+        "_id" : "",  //mongo id
         "locationFavor" : "",
         "locationRecipient" : "",
         "isComplete" : "", //bool
