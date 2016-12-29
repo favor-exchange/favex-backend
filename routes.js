@@ -42,52 +42,91 @@ router.route('/addUser').post(function (req, res) {
     });
 });
 
-router.route('/getFavorsRequested').post(function(req, res){
-    if(req.body.user === undefined){
+router.route('/getUser').post(function (req, res) {
+    //check if user object sent
+    if (req.body.user === undefined) {
         res.end('invalid user object sent')
         console.log('invalid user object sent');
         return;
     }
-    mongo.connect(dburl, function(err, db){
-        if(err){
+
+    mongo.connect(dburl, function (err, db) {
+        if (err) {
             res.end(err);
             console.log(err);
             return;
         }
-        
+
         var users = db.collection('users');
 
-        users.find({'facebookId' : req.body.user.facebookId}).toArray(function(err, docs){
-            
-            if (err){
+        users.find({ 'facebookId': req.body.user.facebookId }).toArray(function (err, docs) {
+            if (err) {
                 res.end(err);
                 console.log(err);
                 return;
             }
-            
-            var foundUser = docs[0];
-            
-            var favorIdArray = [];
-            for(var item in foundUser.favors){
-                favorIdArray.push(foundUser.favors[item].id);
+
+            res.send(docs[0]);
+
+        });
+    });
+
+});
+
+router.route('/getFavorsRequested').post(function (req, res) {
+    if (req.body.user === undefined) {
+        res.end('invalid user object sent')
+        console.log('invalid user object sent');
+        return;
+    }
+
+    mongo.connect(dburl, function (err, db) {
+        if (err) {
+            res.end(err);
+            console.log(err);
+            return;
+        }
+
+        var users = db.collection('users');
+
+        users.find({ 'facebookId': req.body.user.facebookId }).toArray(function (err, docs) {
+
+            if (err) {
+                res.end(err);
+                console.log(err);
+                return;
+            }
+
+            var foundUser = docs[0]; 
+
+            var favorIdArray = []; //array containing mongo ids of favors stored in user object
+            for (var item in foundUser.favors) {
+                favorIdArray.push(foundUser.favors[item].id); //access each id property from array of favor objetcs inside foundUser
             }
 
             var favors = db.collection('favors');
 
-            var favorArray = [];
-            var favorsPushed = 0;
-            for(var i = 0; i < favorIdArray.length; i++){
-                favors.find({"_id" : new mongo.ObjectID(favorIdArray[i])}).toArray(function(err, docs){
+            var favorArray = []; //array of json objects of favors found in favor db
+            var favorsIter = 0; //used to call res.send() when all favors iterated through
+            for (var i = 0; i < favorIdArray.length; i++) {
+                favors.find({ "_id": new mongo.ObjectID(favorIdArray[i]) }).toArray(function (err, docs) {
 
-                    if(err){
+                    if (err) {
                         res.end(err);
                         console.log(err);
                         return;
                     }
+                    if(docs[0] === undefined){
+                        res.end();
+                        console.log('invalid json object')
+                        return;
+                    }
+                    if(docs[0].recipientId === foundUser.facebookId){
+                        favorArray.push(docs[0]);
+                    }
 
-                    favorArray.push(docs[0]);
-                    favorsPushed++;
-                    if(favorsPushed === favorIdArray.length){
+                    favorsIter++;
+                    if (favorsIter === favorIdArray.length) {
                         res.send(favorArray);
                         console.log('favor array sent')
                     }

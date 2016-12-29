@@ -1,27 +1,25 @@
+USER
 {
-    "user": {
-        "facebookId" : "",    //fb id stored in db        
-        "firsName" : "",
-        "lastName" : "",
-        "favors" : [{"id" : ""}],          //array of ids of favor objects in favors collection
-        "location" : { "lat" : "", "long" : ""},
-        "facebookToken" : "",       
-        "firebaseToken" : "", 
-        "rating" : ""         
-    }
+   "facebookId" : "",    //fb id stored in db        
+    "firsName" : "",
+    "lastName" : "",
+    "favors" : [{"id" : ""}],          //array of ids of favor objects in favors collection
+    "location" : { "lat" : "", "long" : ""},
+    "facebookToken" : "",       
+    "firebaseToken" : "", 
+    "rating" : ""         
 }
 
+
+FAVOR
 {
-    "favors" : {
-        "_id" : "",  //mongo id
-        "locationFavor" : "",
-        "locationRecipient" : "",
-        "isComplete" : "", //bool
-        "title" : "", //string
-        "details" : "", //string
-        "recipientId" : "", //fb id of recipient
-        "doerId" : "", //fb id of person of doing favour, initially undefined
-        "priceRange" : {"min" : "", "max" : ""}, //set by recipient
-        "tip" : "" //set by recipient
-    }
+    "locationFavor" : "",
+    "locationRecipient" : "",
+    "isComplete" : "", //bool
+    "title" : "", //string
+    "details" : "", //string
+    "recipientId" : "", //fb id of recipient
+    "doerId" : "", //fb id of person of doing favour, initially undefined
+    "priceRange" : {"min" : "", "max" : ""}, //set by recipient
+    "tip" : "" //set by recipient
 }
