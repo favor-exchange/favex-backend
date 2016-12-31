@@ -1,20 +1,20 @@
 USER
 {
-   "facebookId" : "",    //fb id stored in db        
+   "facebookId" : "",    //fb id stored in db
     "firstName" : "",
     "lastName" : "",
     "favors" : [{"id" : ""}],          //array of ids of favor objects in favors collection
-    "location" : { "lat" : "", "long" : ""},
-    "facebookToken" : "",       
-    "firebaseToken" : "", 
-    "rating" : ""         
+    "location" : { "lat" : "", "lng" : ""},
+    "facebookToken" : "",
+    "firebaseToken" : "",
+    "rating" : ""
 }
 
 
 FAVOR
 {
-    "locationFavor" : "",
-    "locationRecipient" : "",
+    "locationFavor" : { "lat" : "", "lng" : ""},
+    "locationRecipient" : { "lat" : "", "long" : ""},
     "isComplete" : "", //bool
     "title" : "", //string
     "details" : "", //string

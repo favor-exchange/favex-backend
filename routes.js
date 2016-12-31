@@ -1,15 +1,18 @@
 var express = require('express');
 var router = express.Router();
 var mongo = require('mongodb');
-
 var dburl = 'mongodb://localhost/favex' //url to access mongo database
+var googleMapsKey= require('./apiKeys.js').googleMapsKey;
+var googleMapsClient = require('@google/maps').createClient(
+  {
+    key: googleMapsKey
+  });
 
 router.use(function timeLog(req, res, next) {
     var date = new Date(Date.now());
     console.log('Request Recieved: ' + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + ' ' + (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear());
     next();
 }); //logs every request recieved in console, should add request content type checking
-
 
 router.route('/addUser').post(function (req, res) {
 
@@ -176,13 +179,18 @@ router.route('/getFavorsRequested').post(function (req, res) {
 
 router.route('/getFavorsDone').get(function (req, res)
 {
-  if(req.query.id.length === 0)
+  if(req.query.id=== undefined)
   {
     res.send(false);
-    console.log('Missing id parameter in query');
+    console.log('Missing id parameter');
     return;
   }
-
+  else if (req.query.id.length=== 0)
+  {
+    res.send(false);
+    console.log('id key is empty');
+    return;
+  }
   else
   {
     mongo.connect(dburl, function (err, db)
@@ -210,6 +218,103 @@ router.route('/getFavorsDone').get(function (req, res)
           res.send(docs);
           console.log('favorsDone sent');
           db.close();
+        }
+      });
+    });
+  }
+});
+
+router.route('/getNearbyFavors').get(function (req, res)
+{
+  var lat= req.query.lat;
+  var lng= req.query.lng;
+  var radius = (req.query.radius!= undefined && req.query.radius.length!= 0)?
+  req.query.radius : 500; //uses default value meters when radius n/a
+  if(req.query.lat=== undefined || req.query.lng=== undefined)
+  {
+    res.send(false);
+    console.log('Missing lat or lng parameter');
+    return;
+  }
+  else if (req.query.lat.length=== 0 || req.query.lng.length=== 0)
+  {
+    res.send(false);
+    console.log('lat or lng key is empty');
+    return;
+  }
+  else
+  {
+    var userLocation=
+    {
+      lat: lat,
+      lng: lng
+    };
+    mongo.connect(dburl, function (err, db)
+    {
+      if (err)
+      {
+          res.send(false);
+          console.log(err);
+          db.close();
+          return;
+      }
+      var favors= db.collection('favors');
+      favors.find({"doerId": null}).toArray(function (err,openFavors)
+      //above returns favors withour doerId fiels or favors with doerId set to null
+      {
+        if (err)
+        {
+            res.send(false);
+            console.log(err);
+            db.close();
+            return;
+        }
+        else
+        {
+          var favorLocations= [];
+          for(var i=0; i< openFavors.length; i++)
+            favorLocations.push(openFavors[i].locationFavor);
+          if(favorLocations.length === 0)
+          {
+            res.send(false);
+            console.log('no nearby favors available');
+            db.close();
+            return;
+          }
+          else
+          {
+            var distanceQuery =
+            {
+              origins: userLocation,
+              destinations: favorLocations,
+              mode: 'walking'
+            }
+            googleMapsClient.distanceMatrix(distanceQuery, function (err, result)
+            {
+              if (err)
+              {
+                  res.send(false);
+                  console.log(err);
+                  db.close();
+                  return;
+              }
+              else
+              {
+                  var nearbyFavors = [];
+                  for(var i=0; i< result.json.rows[0].elements.length; i++)
+                  {
+                    if(result.json.rows[0].elements[i].distance.value<=radius)
+                    {
+                      nearbyFavors.push(openFavors[i]);
+                      console.log("");
+                    }
+                  }
+                  res.send(nearbyFavors);
+                  console.log('nearby favors sent');
+                  db.close();
+              }
+            });
+          }
         }
       });
     });
