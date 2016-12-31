@@ -42,6 +42,36 @@ router.route('/addUser').post(function (req, res) {
     });
 });
 
+router.route('/addFavor').post(function(req,res)
+{
+  mongo.connect(dburl, function (err, db)
+  {
+      if (err)
+      {
+          res.send(false);
+          console.log(err);
+          return;
+      }
+
+    var favors = db.collection('favors');
+
+    favors.insertOne(req.body.favor, function (err, object)
+    {
+      if (err)
+      {
+          res.send(false);
+          console.log(err);
+      }
+      else
+      {
+        res.send(true);
+        console.log('favor added successfully');
+      }
+      db.close();
+    });
+  });
+});
+
 router.route('/getUser').post(function (req, res) {
     //check if user object sent
     if (req.body.user === undefined) {
@@ -142,6 +172,48 @@ router.route('/getFavorsRequested').post(function (req, res) {
         });
 
     });
+});
+
+router.route('/getFavorsDone').get(function (req, res)
+{
+  if(req.query.id.length === 0)
+  {
+    res.send(false);
+    console.log('Missing id parameter in query');
+    return;
+  }
+
+  else
+  {
+    mongo.connect(dburl, function (err, db)
+    {
+      if (err)
+      {
+          res.send(false);
+          console.log(err);
+          return;
+      }
+
+      var favors= db.collection('favors');
+
+      favors.find({"doerId": req.query.id}).toArray(function (err, docs)
+      {
+        if(err)
+        {
+          res.send(false);
+          console.log(err);
+          db.close();
+          return;
+        }
+        else
+        {
+          res.send(docs);
+          console.log('favorsDone sent');
+          db.close();
+        }
+      });
+    });
+  }
 });
 
 router.route('/updateLocation').put(function (req, res) {
