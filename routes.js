@@ -8,6 +8,7 @@ var googleMapsClient = require('@google/maps').createClient(
     key: googleMapsKey
   });
 
+
 router.use(function timeLog(req, res, next) {
     var date = new Date(Date.now());
     console.log('Request Recieved: ' + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + ' ' + (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear());
@@ -56,7 +57,7 @@ router.route('/addFavor').post(function(req,res)
           return;
       }
 
-    var favors = db.collection('favors');
+    var favors= db.collection('favors');
 
     favors.insertOne(req.body.favor, function (err, object)
     {
@@ -68,7 +69,26 @@ router.route('/addFavor').post(function(req,res)
       else
       {
         res.send(true);
-        console.log('favor added successfully');
+        console.log('favor added to favors collection');
+      }
+      db.close();
+    });
+
+    var users= db.collection('users');
+
+    users.findOneAndUpdate({"_id": new mongo.ObjectID(req.body.favor.recipientId)},
+    {$push: {favors: req.body.favor._id}},
+    function(err, result)
+    {
+      if (err)
+      {
+          res.send(false);
+          console.log(err);
+      }
+      else
+      {
+        res.send(true);
+        console.log('favor id added to recipient user document');
       }
       db.close();
     });
@@ -425,6 +445,48 @@ router.route('/updateFavorStatus').put(function (req, res) {
         );
     });
 });
+
+router.route('/updateDoer').put(function (req,res)
+{
+  if (req.body.favor === undefined)
+  {
+      res.send(false)
+      console.log('invalid user favor sent');
+      return;
+  }
+  else
+  {
+    mongo.connect(dburl, function (err, db)
+    {
+        if (err)
+        {
+            res.send(false);
+            console.log(err);
+            return;
+        }
+        var favors = db.collection('favors');
+        favors.findOneAndUpdate({"_id" : new mongo.ObjectID(req.body.favor._id)},
+        {$set : {"doerId" : req.body.favor.doerId}}, null,
+        function (err, result)
+        {
+          if(err)
+          {
+            res.send(false);
+            console.log(err);
+            db.close();
+            return;
+          }
+          else
+          {
+            res.send(true);
+            console.log("doerId: " + req.body.favor.doerId + " updated successfully");
+            db.close();
+          }
+        });
+    });
+  }
+});
+
 
 router.route('/deleteFavor').delete(function(req, res){
     if (req.body.favor === undefined) {
