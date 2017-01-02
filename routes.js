@@ -466,7 +466,7 @@ router.route('/updateDoer').put(function (req,res)
         }
         var favors = db.collection('favors');
         favors.findOneAndUpdate({"_id" : new mongo.ObjectID(req.body.favor._id)},
-        {$set : {"doerId" : req.body.favor.doerId}}, null,
+        {$set : {"doerId" : req.body.favor.doerId}},
         function (err, result)
         {
           if(err)
@@ -487,6 +487,46 @@ router.route('/updateDoer').put(function (req,res)
   }
 });
 
+router.route('/updateRating').put(function (req,res)
+{
+  if (req.body.user === undefined)
+  {
+      res.send(false)
+      console.log('invalid user object sent');
+      return;
+  }
+  else
+  {
+    mongo.connect(dburl, function (err, db)
+    {
+        if (err)
+        {
+            res.send(false);
+            console.log(err);
+            return;
+        }
+        var users= db.collection('users');
+        users.findOneAndUpdate({"_id" : new mongo.ObjectID(req.body.user._id)},
+        {$set : {"rating" : req.body.user.rating}},
+        function (err, result)
+        {
+          if(err)
+          {
+            res.send(false);
+            console.log(err);
+            db.close();
+            return;
+          }
+          else
+          {
+            res.send(true);
+            console.log("rating: " + req.body.user.rating + " updated successfully");
+            db.close();
+          }
+        });
+    });
+  }
+});
 
 router.route('/deleteFavor').delete(function(req, res){
     if (req.body.favor === undefined) {
@@ -516,6 +556,41 @@ router.route('/deleteFavor').delete(function(req, res){
 
                 res.send(true);
                 console.log('favor: ' + req.body.favor._id + ' successfully deleted');
+                db.close();
+            }
+        );
+    });
+});
+
+router.route('/deleteUser').delete(function(req, res){
+    if (req.body.user === undefined)
+    {
+        res.send(false)
+        console.log('invalid user object sent');
+        return;
+    }
+    mongo.connect(dburl, function(err, db)
+    {
+        if(err)
+        {
+            res.send(false);
+            console.log(err);
+            return;
+        }
+        var users = db.collection('users');
+        users.remove(
+            {"_id" : new mongo.ObjectID(req.body.user._id)},
+            function(err)
+            {
+                if(err)
+                {
+                    res.send(false);
+                    console.log(err);
+                    db.close();
+                    return;
+                }
+                res.send(true);
+                console.log('user: ' + req.body.user._id + ' successfully deleted');
                 db.close();
             }
         );

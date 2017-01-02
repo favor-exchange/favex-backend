@@ -14,7 +14,7 @@ USER
 FAVOR
 {
     "locationFavor" : { "lat" : "", "lng" : ""},
-    "locationRecipient" : { "lat" : "", "long" : ""},
+    "locationRecipient" : { "lat" : "", "lng" : ""},
     "isComplete" : "", //bool
     "title" : "", //string
     "details" : "", //string
