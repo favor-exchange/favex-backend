@@ -1,7 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var mongo = require('mongodb');
-var dburl = 'mongodb://localhost/favex' //url to access mongo database
+//var dburl = 'mongodb://localhost/favex'; //url to access mongo database
+var dburl= 'mongodb://favex:favexDev254@ds037155.mlab.com:37155/favex';
 var googleMapsKey = require('./apiKeys.js').googleMapsKey;
 var googleMapsClient = require('@google/maps').createClient(
     {
@@ -70,19 +71,6 @@ router.route('/addFavor').post(function (req, res) {
 
         var users = db.collection('users');
 
-        users.findOneAndUpdate({ "_id": new mongo.ObjectID(req.body.favor.recipientId) },
-            { $push: { favors: req.body.favor._id } },
-            function (err, result) {
-                if (err) {
-                    res.send(false);
-                    console.log(err);
-                }
-                else {
-                    res.send(true);
-                    console.log('favor id added to recipient user document');
-                }
-                db.close();
-            });
     });
 });
 
