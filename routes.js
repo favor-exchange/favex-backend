@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var mongo = require('mongodb');
 //var dburl = 'mongodb://localhost/favex'; //url to access mongo database
-var dburl= 'mongodb://favex:favexDev254@ds037155.mlab.com:37155/favex';
+var dburl= require('./apiKeys.js').mongoLabUrl;
 var googleMapsKey = require('./apiKeys.js').googleMapsKey;
 var googleMapsClient = require('@google/maps').createClient(
     {
