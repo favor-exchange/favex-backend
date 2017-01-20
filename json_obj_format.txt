@@ -13,13 +13,13 @@ USER
 
 FAVOR
 {
-    "locationFavor" : { "lat" : "", "lng" : ""},
-    "locationRecipient" : { "lat" : "", "lng" : ""},
+    "locationFavorId" : "", //string
+    "locationRecipientId" : "", //string
     "isComplete" : "", //bool
     "title" : "", //string
     "details" : "", //string
     "recipientId" : "", //fb id of recipient
-    "doerId" : "", //fb id of person of doing favour, initially undefined
+    "doerId" : "", //fb id of person of doing favor, initially undefined
     "priceRange" : {"min" : "", "max" : ""}, //set by recipient
     "tip" : "" //set by recipient
 }
