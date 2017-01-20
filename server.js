@@ -7,7 +7,7 @@ var routes = require('./routes');
 app.use(parser.urlencoded({extended: true}));
 app.use(parser.json());
 
-var port = 3000;
+var port = 80;
 
 app.use('/', routes);
 app.listen(port);
