@@ -589,7 +589,7 @@ router.route('/updateRating').put(function (req, res) {
                 return;
             }
             var users = db.collection('users');
-            users.findOneAndUpdate({ "_id": new mongo.ObjectID(req.body.user._id) },
+            users.findOneAndUpdate({ "facebookId": req.body.user.facebookId },
                 { $set: { "rating": req.body.user.rating } },
                 function (err, result) {
                     if (err) {
@@ -656,7 +656,7 @@ router.route('/deleteUser').delete(function (req, res) {
         }
         var users = db.collection('users');
         users.remove(
-            { "_id": new mongo.ObjectID(req.body.user._id) },
+            { "facebookId": req.body.user.facebookId },
             function (err) {
                 if (err) {
                     res.send(false);
@@ -665,7 +665,7 @@ router.route('/deleteUser').delete(function (req, res) {
                     return;
                 }
                 res.send(true);
-                logger.info('user: ' + req.body.user._id + ' successfully deleted');
+                logger.info('user: ' + req.body.user.facebookId + ' successfully deleted');
                 db.close();
             }
         );
