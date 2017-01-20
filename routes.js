@@ -230,13 +230,13 @@ router.route('/getNearbyFavors').get(function (req, res) {
     if (req.query.userLocationId === undefined)
     {
         res.send(false);
-        console.log('Missing userLocationId parameter');
+        logger.info('Missing userLocationId parameter');
         return;
     }
     else if (req.query.userLocationId.length === 0)
     {
         res.send(false);
-        console.log('userLocationId key is empty');
+        logger.info('userLocationId key is empty');
         return;
     }
     else
@@ -245,7 +245,7 @@ router.route('/getNearbyFavors').get(function (req, res) {
         if (err)
         {
             res.send(false);
-            console.log(err);
+            logger.info(err);
             db.close();
             return;
          }
@@ -256,7 +256,7 @@ router.route('/getNearbyFavors').get(function (req, res) {
             if (err)
             {
                 res.send(false);
-                console.log(err);
+                logger.info(err);
                 db.close();
                 return;
             }
@@ -265,7 +265,7 @@ router.route('/getNearbyFavors').get(function (req, res) {
                 if (openFavors.length === 0)
                 {
                     res.send(false);
-                    console.log('no favors available');
+                    logger.info('no favors available');
                     db.close();
                     return;
                 }
@@ -280,7 +280,7 @@ router.route('/getNearbyFavors').get(function (req, res) {
                       if (err)
                       {
                           res.send(false);
-                          console.log(err);
+                          logger.info(err);
                           db.close();
                           return;
                       }
@@ -291,7 +291,7 @@ router.route('/getNearbyFavors').get(function (req, res) {
                           lat:userLat,
                           lng:userLng
                       };
-                      console.log("user coordinates "+userLat+" "+userLng);
+                      logger.info("user coordinates "+userLat+" "+userLng);
                       var favorLocationObjArray= []; //will store {lat:x,lng:y} for each favor location
                       var recursive = function populateFavorLocationObjArray(index)
                       {
@@ -308,7 +308,7 @@ router.route('/getNearbyFavors').get(function (req, res) {
                               if (err)
                               {
                                   res.send(false);
-                                  console.log(err);
+                                  logger.info(err);
                                   db.close();
                                   return;
                               }
@@ -320,18 +320,18 @@ router.route('/getNearbyFavors').get(function (req, res) {
                                     if(!result.json.rows[0].elements[j].hasOwnProperty("distance")
                                       || result.json.rows[0].elements[j].distance.value>distance) //remove large distances
                                     {
-                                        console.log(result.json.rows[0].elements);
-                                        console.log(openFavors.splice(j,1));
+                                        logger.info(result.json.rows[0].elements);
+                                        logger.info(openFavors.splice(j,1));
                                         favorLocationObjArray.splice(j,1);
                                     }
                                     else
                                     {
                                         distanceArray.push(result.json.rows[0].elements[j].distance.value);
-                                        console.log("pushed");
+                                        logger.info("pushed");
                                     }
                                   }
                                   var openFavorsLength= openFavors.length; //saved as value will be altered below
-                                  console.log("openfavorslength "+openFavors.length);
+                                  logger.info("openfavorslength "+openFavors.length);
                                   var recursive1= function queryEachDestination(index)
                                   {
                                     if(index===openFavorsLength)
@@ -341,7 +341,7 @@ router.route('/getNearbyFavors').get(function (req, res) {
                                         if(distanceArray[m]>distance)
                                           openFavors.splice(m,1);
                                       }
-                                      console.log("completed algorithm");
+                                      logger.info("completed algorithm");
                                       res.send(openFavors);
                                       return;
                                     }
@@ -354,7 +354,7 @@ router.route('/getNearbyFavors').get(function (req, res) {
                                             if (err)
                                             {
                                                 res.send(false);
-                                                console.log(err);
+                                                logger.info(err);
                                                 db.close();
                                                 return;
                                             }
@@ -365,20 +365,20 @@ router.route('/getNearbyFavors').get(function (req, res) {
                                                 lat:destinationLat,
                                                 lng:destinationLng
                                             };
-                                            console.log(destinationObj);
+                                            logger.info(destinationObj);
                                             var distanceFromFavorToRecipientQuery =
                                             {
                                                 origins: favorLocationObjArray[index],
                                                 destinations: destinationObj,
                                                 mode: 'walking'
                                             };
-                                            console.log(distanceFromFavorToRecipientQuery);
+                                            logger.info(distanceFromFavorToRecipientQuery);
                                             googleMapsClient.distanceMatrix(distanceFromFavorToRecipientQuery, function (err, result)
                                             {
                                                 if (err)
                                                 {
                                                     res.send(false);
-                                                    console.log(err);
+                                                    logger.info(err);
                                                     db.close();
                                                     return;
                                                 }
@@ -391,9 +391,9 @@ router.route('/getNearbyFavors').get(function (req, res) {
                                                 else
                                                 {
                                                     distanceArray[index]=distanceArray[index]+result.json.rows[0].elements[0].distance.value;
-                                                    console.log("distArray "+distanceArray[index])
+                                                    logger.info("distArray "+distanceArray[index])
                                                 }
-                                                console.log("here");
+                                                logger.info("here");
                                                 queryEachDestination(++index);
                                           });
                                         });
@@ -406,26 +406,26 @@ router.route('/getNearbyFavors').get(function (req, res) {
                         {
                             placeid:openFavors[index].locationFavorId //contains id of favor location
                         };
-                        console.log("favor id "+openFavors[index].locationFavorId);
+                        logger.info("favor id "+openFavors[index].locationFavorId);
                         googleMapsClient.place(favorCoordinatesQuery, function (err, result)
                         {
                           if (err)
                           {
                               res.send(false);
-                              console.log(err);
+                              logger.info(err);
                               db.close();
                               return;
                           }
                           var favorLat=result.json.result.geometry.location.lat;
                           var favorLng=result.json.result.geometry.location.lng;
-                          console.log("favor coordinates "+favorLat+" "+favorLng);
+                          logger.info("favor coordinates "+favorLat+" "+favorLng);
                           var favorLocationObj=
                           {
                                 lat:favorLat,
                                 lng:favorLng
                           };
                           favorLocationObjArray.push(favorLocationObj);
-                          console.log(favorLocationObjArray);
+                          logger.info(favorLocationObjArray);
                           populateFavorLocationObjArray(++index);
                         });
                       }(0);
