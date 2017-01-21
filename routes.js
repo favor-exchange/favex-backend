@@ -315,18 +315,22 @@ router.route('/getNearbyFavors').get(function (req, res) {
                               else
                               {
                                 var distanceArray= []; //stores total distance that doer will travel
-                                for (var j = 0; j < result.json.rows[0].elements.length; j++)
+                                for (var j = result.json.rows[0].elements.length-1; j >= 0; j--)
                                 {
                                     if(!result.json.rows[0].elements[j].hasOwnProperty("distance")
                                       || result.json.rows[0].elements[j].distance.value>distance) //remove large distances
                                     {
-                                        logger.info(result.json.rows[0].elements);
+                                        logger.info("printing array BEFORE deletion");
+                                        logger.info(openFavors);
+                                        logger.info("removing an object after first sweep");
                                         logger.info(openFavors.splice(j,1));
+                                        logger.info("printing array AFTER deletion");
+                                        logger.info(openFavors);
                                         favorLocationObjArray.splice(j,1);
                                     }
                                     else
                                     {
-                                        distanceArray.push(result.json.rows[0].elements[j].distance.value);
+                                        distanceArray.unshift(result.json.rows[0].elements[j].distance.value);
                                         logger.info("pushed");
                                     }
                                   }
