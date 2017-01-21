@@ -303,6 +303,8 @@ router.route('/getNearbyFavors').get(function (req, res) {
                                       {
                                         if(distanceArray[m]>distance)
                                           openFavors.splice(m,1);
+                                        else
+                                          openFavors[m].distance=distanceArray[m]; //added distance property to nearby favors
                                       }
                                       console.log("completed algorithm");
                                       res.send(openFavors);
