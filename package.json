@@ -5,7 +5,9 @@
     "@google/maps": "^0.3.1",
     "body-parser": "~1.15.2",
     "express": "~4.14.0",
-    "mongodb": "~2.2.11"
+    "mongodb": "~2.2.11",
+    "winston": "latest",
+    "winston-daily-rotate-file" : "latest"
   },
   "devDependencies": {
     "nodemon": "^1.11.0"
