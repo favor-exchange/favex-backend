@@ -1,4 +1,3 @@
-'use strict';
 var express = require('express');
 var router = express.Router();
 var mongo = require('mongodb');
@@ -100,7 +99,7 @@ router.route('/addFavor').post(function (req, res) {
                 logger.info(err);
             }
             else {
-                res.send(true);
+                res.send(object.insertedId.toString());
                 logger.info('favor added to favors collection');
             }
             db.close();
