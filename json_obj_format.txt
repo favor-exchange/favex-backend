@@ -19,6 +19,7 @@ FAVOR
     "title" : "", //string
     "details" : "", //string
     "recipientId" : "", //fb id of recipient
+    "distance": ""//int //property is only added to client version of object upon requesting nearby favors
     "doerId" : "", //fb id of person of doing favor, initially undefined
     "priceRange" : {"min" : "", "max" : ""}, //set by recipient
     "tip" : "" //set by recipient

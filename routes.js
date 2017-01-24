@@ -224,19 +224,20 @@ router.route('/getFavorsDone').get(function (req, res) {
 });
 
 router.route('/getNearbyFavors').get(function (req, res) {
-    var userLocationId = req.query.userLocationId;
+    var userLat= req.query.lat;
+    var userLng= req.query.lng;
     var distance = (req.query.distance != undefined && req.query.distance.length != 0) ?
         req.query.distance : 500; //uses default value meters when radius n/a
-    if (req.query.userLocationId === undefined)
+    if (req.query.userLat === undefined || req.query.userLng === undefined)
     {
         res.send(false);
-        logger.info('Missing userLocationId parameter');
+        logger.info('Missing lat or lng parameter');
         return;
     }
-    else if (req.query.userLocationId.length === 0)
+    else if (req.query.userLat.length === 0 || req.query.userLng.length === 0)
     {
         res.send(false);
-        logger.info('userLocationId key is empty');
+        logger.info('lat or lng parameter is empty');
         return;
     }
     else
@@ -271,21 +272,6 @@ router.route('/getNearbyFavors').get(function (req, res) {
                 }
                 else
                 {
-                    var userCoordinatesQuery=
-                    {
-                        placeid:userLocationId
-                    };
-                    googleMapsClient.place(userCoordinatesQuery, function (err, result) //to find lat and lng of user
-                    {
-                      if (err)
-                      {
-                          res.send(false);
-                          logger.info(err);
-                          db.close();
-                          return;
-                      }
-                      var userLat=result.json.result.geometry.location.lat;
-                      var userLng=result.json.result.geometry.location.lng;
                       var userLocationObj=
                       {
                           lat:userLat,
@@ -435,7 +421,6 @@ router.route('/getNearbyFavors').get(function (req, res) {
                           populateFavorLocationObjArray(++index);
                         });
                       }(0);
-                    });
                   }
                 }
               });
