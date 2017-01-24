@@ -229,13 +229,13 @@ router.route('/getNearbyFavors').get(function (req, res) {
     var userLng= req.query.lng;
     var distance = (req.query.distance != undefined && req.query.distance.length != 0) ?
         req.query.distance : 500; //uses default value meters when radius n/a
-    if (req.query.userLat === undefined || req.query.userLng === undefined)
+    if (req.query.lat === undefined || req.query.lng === undefined)
     {
         res.send(false);
         logger.info('Missing lat or lng parameter');
         return;
     }
-    else if (req.query.userLat.length === 0 || req.query.userLng.length === 0)
+    else if (req.query.lat.length === 0 || req.query.lng.length === 0)
     {
         res.send(false);
         logger.info('lat or lng parameter is empty');
