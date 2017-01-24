@@ -35,6 +35,7 @@ const logger = new (winston.Logger)({
       timestamp: tsFormat,
       datePattern: 'yyyy-MM-dd',
       prepend: true,
+      json: false,
       level: env === 'development' ? 'verbose' : 'info'
     })
   ]
@@ -48,7 +49,7 @@ logger.error('Error info');
 
 router.use(function timeLog(req, res, next) {
     var date = new Date(Date.now());
-    logger.info('Request Recieved: ' + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + ' ' + (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear());
+    logger.info('Request Recieved');
     next();
 }); //logs every request recieved in console, should add request content type checking
 
