@@ -159,6 +159,8 @@ router.route('/getFavorsRequested').get(function (req, res) {
         return;
     }
 
+    res.setHeader('Cache-Control', 'public, max-age=300');
+
     mongo.connect(dburl, function (err, db) {
         if (err) {
             res.send(false);
@@ -197,6 +199,9 @@ router.route('/getFavorsDone').get(function (req, res) {
         return;
     }
     else {
+
+        res.setHeader('Cache-Control', 'public, max-age=300');
+
         mongo.connect(dburl, function (err, db) {
             if (err) {
                 res.send(false);
@@ -242,6 +247,8 @@ router.route('/getNearbyFavors').get(function (req, res) {
     }
     else
     {
+        res.setHeader('Cache-Control', 'public, max-age=300');
+        
         mongo.connect(dburl, function (err, db) {
         if (err)
         {
