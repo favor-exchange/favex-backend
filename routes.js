@@ -307,12 +307,11 @@ router.route('/getNearbyFavors').get(function (req, res) {
                                     if(!result.json.rows[0].elements[j].hasOwnProperty("distance")
                                       || result.json.rows[0].elements[j].distance.value>distance) //remove large distances
                                     {
-                                        logger.info("printing array BEFORE deletion");
-                                        logger.info(openFavors);
                                         logger.info("removing an object after first sweep");
+                                        logger.info("returned google call");
+                                        logger.info(result.json.rows[0].elements[j]);
+                                        logger.info("favor object")
                                         logger.info(openFavors.splice(j,1));
-                                        logger.info("printing array AFTER deletion");
-                                        logger.info(openFavors);
                                         favorLocationObjArray.splice(j,1);
                                     }
                                     else
@@ -365,7 +364,6 @@ router.route('/getNearbyFavors').get(function (req, res) {
                                                 destinations: destinationObj,
                                                 mode: 'walking'
                                             };
-                                            logger.info(distanceFromFavorToRecipientQuery);
                                             googleMapsClient.distanceMatrix(distanceFromFavorToRecipientQuery, function (err, result)
                                             {
                                                 if (err)
@@ -409,8 +407,6 @@ router.route('/getNearbyFavors').get(function (req, res) {
                               db.close();
                               return;
                           }
-                          console.log("testing crash");
-                          console.log(result.json);
                           var favorLat=result.json.result.geometry.location.lat;
                           var favorLng=result.json.result.geometry.location.lng;
                           logger.info("favor coordinates "+favorLat+" "+favorLng);
@@ -420,7 +416,6 @@ router.route('/getNearbyFavors').get(function (req, res) {
                                 lng:favorLng
                           };
                           favorLocationObjArray.push(favorLocationObj);
-                          logger.info(favorLocationObjArray);
                           populateFavorLocationObjArray(++index);
                         });
                       }(0);
