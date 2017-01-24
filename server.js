@@ -10,6 +10,6 @@ app.use(parser.json());
 var port = 80;
 
 app.use('/', routes);
-app.listen(port);
-
+const server= app.listen(port);
+server.timeout= 240000;
 console.log('Listening on local host port: ' + port);

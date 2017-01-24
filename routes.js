@@ -409,6 +409,8 @@ router.route('/getNearbyFavors').get(function (req, res) {
                               db.close();
                               return;
                           }
+                          console.log("testing crash");
+                          console.log(result.json);
                           var favorLat=result.json.result.geometry.location.lat;
                           var favorLng=result.json.result.geometry.location.lng;
                           logger.info("favor coordinates "+favorLat+" "+favorLng);
