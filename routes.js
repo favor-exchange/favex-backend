@@ -228,7 +228,7 @@ router.route('/getFavorsDone').get(function (req, res) {
     }
 });
 
-router.route('/getNearbyFavors').get(function (req, res) {
+/*router.route('/getNearbyFavors').get(function (req, res) {
     var userLat= req.query.lat;
     var userLng= req.query.lng;
     var distance = (req.query.distance != undefined && req.query.distance.length != 0) ?
@@ -248,7 +248,7 @@ router.route('/getNearbyFavors').get(function (req, res) {
     else
     {
         res.setHeader('Cache-Control', 'public, max-age=300');
-        
+
         mongo.connect(dburl, function (err, db) {
         if (err)
         {
@@ -430,7 +430,158 @@ router.route('/getNearbyFavors').get(function (req, res) {
               });
           });
         }
-      });
+      });*/
+
+router.route('/getNearbyFavors').get(function (req, res) {
+    var userLat= req.query.lat;
+    var userLng= req.query.lng;
+    var distance = (req.query.distance != undefined && req.query.distance.length != 0) ?
+        req.query.distance : 500; //uses default value meters when radius n/a
+    if (req.query.lat === undefined || req.query.lng === undefined)
+    {
+        res.send(false);
+        logger.info('Missing lat or lng parameter');
+        return;
+    }
+    else if (req.query.lat.length === 0 || req.query.lng.length === 0)
+    {
+        res.send(false);
+        logger.info('lat or lng parameter is empty');
+        return;
+    }
+    else
+    {
+        res.setHeader('Cache-Control', 'public, max-age=300');
+        mongo.connect(dburl, function (err, db) {
+        if (err)
+        {
+            res.send(false);
+            logger.info(err);
+            db.close();
+            return;
+         }
+        var favors = db.collection('favors');
+        favors.find({ "doerId": null }).toArray(function (err, openFavors)
+        //above returns favors without doerId field or favors with doerId set to null
+        {
+            if (err)
+            {
+                res.send(false);
+                logger.info(err);
+                db.close();
+                return;
+            }
+            else
+            {
+                if (openFavors.length === 0)
+                {
+                    res.send(false);
+                    logger.info('no favors available');
+                    db.close();
+                    return;
+                }
+                else
+                {
+                    var nearbyFunctionVar= function nearbyFunction(nearbyCallback)
+                    {
+                        var userLocationObj=
+                        {
+                            lat:userLat,
+                            lng:userLng
+                        };
+                        var favorDistanceCounter = 0;
+                        var destinationDistanceCounter = 0;
+                        logger.info("user coordinates "+userLat+" "+userLng);
+                        var favorLocationObjArray= []; //will store {lat:x,lng:y} for each favor location
+                        var distanceArray
+                        for(var i=0;i<openFavors.length;i++)
+                        {
+                          favorLocationObjArray.push(openFavors[i].favorLatLng);
+                          console.log(favorLocationObjArray[i]);
+                        }
+                        var distanceFromUserToFavorQuery =
+                        {
+                            origins: userLocationObj,
+                            destinations: favorLocationObjArray,
+                            mode: 'walking'
+                        };
+                        googleMapsClient.distanceMatrix(distanceFromUserToFavorQuery, function (err, result)
+                        {
+                            if (err)
+                            {
+                                res.send(false);
+                                logger.info(err);
+                                db.close();
+                                return;
+                            }
+                            else
+                            {
+                              for (var j = 0; j < result.json.rows[0].elements.length; j++)
+                              {
+                                  if(result.json.rows[0].elements[j].hasOwnProperty("distance") && openFavors[j].distance!=null)
+                                      openFavors[j].distance=openFavors[j].distance+result.json.rows[0].elements[j].distance.value;
+                                  else
+                                      openFavors[j].distance=null;
+                                  favorDistanceCounter++;
+                                  console.log("favorDistanceCounter up");
+                              }
+                            }
+                          });
+                          var recursive= function favorToRecipientFunction(index)
+                          {
+                              var distanceFromFavorToRecipientQuery =
+                              {
+                                  origins: openFavors[index].favorLatLng,
+                                  destinations: openFavors[index].recipientLatLng,
+                                  mode: 'walking'
+                              };
+                              console.log(distanceFromFavorToRecipientQuery);
+                              googleMapsClient.distanceMatrix(distanceFromFavorToRecipientQuery, function (err, result)
+                              {
+                                  console.log("test");
+                                  if (err)
+                                  {
+                                      res.send(false);
+                                      logger.info(err);
+                                      db.close();
+                                      return;
+                                  }
+                                  if (result.json.rows[0].elements[0].hasOwnProperty("distance") && openFavors[index].distance!=null)
+                                  {
+                                      console.log("in if");
+                                      openFavors[index].distance=openFavors[index].distance+result.json.rows[0].elements[0].distance.value;
+                                  }
+                                  else
+                                  {
+                                      console.log("in else");
+                                      openFavors[index].distance=null;
+                                  }
+                                  destinationDistanceCounter++;
+                                  console.log("destinationDistanceCounter up");
+                                  nearbyCallback(favorDistanceCounter,destinationDistanceCounter);
+                                  favorToRecipientFunction(++index);
+                              });
+                          }(0);
+                        }
+                        (function(favorDistanceCounter,destinationDistanceCounter)
+                        {
+                            if(openFavors.length===favorDistanceCounter && openFavors.length===destinationDistanceCounter)
+                            {
+                              for(var i=openFavors.length-1;i>=0;i--)
+                              {
+                                  if(openFavors[i].distance>distance)
+                                      openFavors.splice(i,1);
+                              }
+                              res.send(openFavors);
+                              logger.info("done!");
+                            }
+                        });
+                      }
+                    }
+                  });
+                });
+              }
+            });
 
 router.route('/updateLocation').put(function (req, res) {
     if (req.body.user === undefined) {
