@@ -15,6 +15,13 @@ FAVOR
 {
     "locationFavorId" : "", //string
     "locationRecipientId" : "", //string
+    "locationFavorName":"",
+    "locationRecipientName:"",
+    "locationFavorAddress:"",
+    "locationRecipientAddress:"",
+    "favorLatLng":{"lat":"","lng":""},
+    "recipientLatLng":{"lat":"","lng":""}
+    "distance":0,
     "isComplete" : "", //bool
     "title" : "", //string
     "details" : "", //string
