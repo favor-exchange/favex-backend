@@ -431,7 +431,29 @@ router.route('/getFavorsDone').get(function (req, res) {
           });
         }
       });*/
-
+function nearbyCallback(res, nearByFavors, openFavors, favorDistanceCounter, destinationDistanceCounter, distance)
+{
+    console.log("in callback");
+    console.log("openlength "+openFavors.length);
+    console.log("fcount "+favorDistanceCounter);
+    console.log("dcount "+destinationDistanceCounter);
+    if(openFavors.length===favorDistanceCounter && openFavors.length===destinationDistanceCounter)
+    {
+      console.log("in callback's if");
+      for(var i=openFavors.length-1;i>=0;i--)
+      {
+          console.log("callback item disteance "+openFavors[i].distance);
+          console.log("distance "+distance)
+          if(openFavors[i].distance<=distance)
+          {
+              nearByFavors.push(openFavors[i]);
+              console.log(openFavors[i]);
+          }
+      }
+      res.send(nearByFavors);
+      logger.info("done!");
+    }
+}
 router.route('/getNearbyFavors').get(function (req, res) {
     var userLat= req.query.lat;
     var userLng= req.query.lng;
@@ -482,13 +504,14 @@ router.route('/getNearbyFavors').get(function (req, res) {
                 }
                 else
                 {
-                    var nearbyFunctionVar= function nearbyFunction(nearbyCallback)
+                    var nearbyFunctionVar= function nearbyFunction(callback)
                     {
                         var userLocationObj=
                         {
                             lat:userLat,
                             lng:userLng
                         };
+                        var nearByFavors= [];
                         var favorDistanceCounter = 0;
                         var destinationDistanceCounter = 0;
                         logger.info("user coordinates "+userLat+" "+userLng);
@@ -524,6 +547,7 @@ router.route('/getNearbyFavors').get(function (req, res) {
                                       openFavors[j].distance=null;
                                   favorDistanceCounter++;
                                   console.log("favorDistanceCounter up");
+                                  callback(res, nearByFavors, openFavors, favorDistanceCounter, destinationDistanceCounter, distance);
                               }
                             }
                           });
@@ -536,8 +560,11 @@ router.route('/getNearbyFavors').get(function (req, res) {
                                   mode: 'walking'
                               };
                               console.log(distanceFromFavorToRecipientQuery);
+                              console.log("in recursion");
                               googleMapsClient.distanceMatrix(distanceFromFavorToRecipientQuery, function (err, result)
                               {
+                                  if(index<openFavors.length)
+                                  {
                                   console.log("test");
                                   if (err)
                                   {
@@ -558,24 +585,13 @@ router.route('/getNearbyFavors').get(function (req, res) {
                                   }
                                   destinationDistanceCounter++;
                                   console.log("destinationDistanceCounter up");
-                                  nearbyCallback(favorDistanceCounter,destinationDistanceCounter);
+                                  callback(res, nearByFavors, openFavors,favorDistanceCounter,destinationDistanceCounter, distance);
                                   favorToRecipientFunction(++index);
+                                }
                               });
                           }(0);
                         }
-                        (function(favorDistanceCounter,destinationDistanceCounter)
-                        {
-                            if(openFavors.length===favorDistanceCounter && openFavors.length===destinationDistanceCounter)
-                            {
-                              for(var i=openFavors.length-1;i>=0;i--)
-                              {
-                                  if(openFavors[i].distance>distance)
-                                      openFavors.splice(i,1);
-                              }
-                              res.send(openFavors);
-                              logger.info("done!");
-                            }
-                        });
+                        (nearbyCallback);
                       }
                     }
                   });
